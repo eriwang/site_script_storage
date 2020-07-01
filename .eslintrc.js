@@ -2,7 +2,8 @@ module.exports = {
     'env': {
         'node': true,
         'browser': true,
-        'es2020': true
+        'es2020': true,
+        'webextensions': true,
     },
     'extends': ['eslint:recommended', 'plugin:react/recommended'],
     'parserOptions': {

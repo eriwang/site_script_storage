@@ -1,25 +1,31 @@
 const path = require('path');
 
 module.exports = {
-    entry: './src/app.js',
-    output: {
-        'filename': 'main.js',
-        path: path.resolve(__dirname, 'gen/')
+    'entry': {
+        'background': './src/background.js',
+        'popup': './src/popup.js',
+        'options': './src/options.js'
     },
-    externals: {
-        jquery: 'jQuery'
+    'output': {
+        'filename': '[name].js',
+        'path': path.resolve(__dirname, 'gen/')
     },
 
-    module: {
-        rules: [
+    'module': {
+        'rules': [
             {
-                test: /\.js$/,
-                exclude: [/node_modules/],
-                loader: 'babel-loader'
+                'test': /\.js$/,
+                'exclude': [/node_modules/],
+                'loader': 'babel-loader'
             },
             {
-                test: /\.css$/,
-                use: ['style-loader', 'css-loader']
+                'test': /\.css$/,
+                'use': ['style-loader', 'css-loader']
+            },
+            {
+                'test': /\.html$/,
+                'loader': 'file-loader',
+                'options': {'name': '[name].[ext]'}
             }
         ]
     },
