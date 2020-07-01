@@ -1,2 +1,5 @@
+# Build output
+gen/
+
 # Dev Directories
 node_modules/

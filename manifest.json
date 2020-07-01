@@ -1,0 +1,17 @@
+{
+    "name": "Site Script Storage",
+    "version": "1.0",
+    "description": "Runs user scripts on sites.",
+    "manifest_version": 2,
+
+    "permissions": ["activeTab", "declarativeContent", "storage"],
+
+    "options_page": "gen/options.html",
+    "background": {
+        "scripts": ["gen/background.js"],
+        "persistent": false
+    },
+    "page_action": {
+        "default_popup": "gen/popup.html"
+    }
+}
