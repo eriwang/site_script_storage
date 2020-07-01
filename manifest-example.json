@@ -4,7 +4,7 @@
     "description": "Runs user scripts on sites.",
     "manifest_version": 2,
 
-    "permissions": ["activeTab", "declarativeContent", "storage"],
+    "permissions": ["activeTab", "declarativeContent", "storage", "syncFileSystem"],
 
     "options_page": "gen/options.html",
     "background": {
