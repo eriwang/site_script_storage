@@ -1,7 +1,7 @@
 import gapi from 'gapi';
 
 import './popup.html';
-import keys from '../keys.json';
+import keys from '../../keys.json';
 
 // The "google" variable is loaded by the gapi.load('picker') call. Unfortunately, making it an external in webpack
 // messes with the module imports since "google" isn't defined yet, so we go with a magical global variable instead.
@@ -56,7 +56,7 @@ function echoFile(data)
             .then((data) => {
                 chrome.tabs.executeScript({
                     'code': data['body']
-                });
+                }, () => chrome.tabs.executeScript({'code': 'console.log(a)'}));
             });
     }
 }
