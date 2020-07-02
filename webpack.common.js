@@ -11,7 +11,7 @@ module.exports = {
         'path': path.resolve(__dirname, 'gen/')
     },
 
-    externals: {
+    'externals': {
         'gapi': 'gapi'
     },
 
