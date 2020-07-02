@@ -3,7 +3,7 @@ import gapi from 'gapi';
 import './popup.html';
 import keys from '../../keys.json';
 
-// TODO: lots of unused code in this file.
+// TODO: lots of unused code in this file. Pretty much only thing that'll stay is the execution.
 window.onload = () => {
     gapi.load('picker');  // takes a callback too
 

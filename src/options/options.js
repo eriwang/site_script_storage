@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import './options.html';
+import DriveScriptsManager from '../common/drive_scripts_manager.js';
 import keys from '../../keys.json';
 
 // The "google" variable is loaded by the gapi.load('picker') call. Unfortunately, making it an external in webpack
@@ -14,18 +15,20 @@ class Options extends React.Component
     {
         super(props);
         this.state = {
-            'importButtonEnabled': false
+            'importButtonEnabled': false,
+            'scripts': []
         };
     }
 
     componentDidMount()
     {
         gapi.load('picker', () => this.setState({'importButtonEnabled': true}));
+        DriveScriptsManager.addChangeHandler((scripts) => this.setState({'scripts': scripts}));
+        DriveScriptsManager.loadScripts();
     }
 
     handleImportButtonClick = () =>
     {
-        console.log('clicked');
         gapi.client.init({
             apiKey: keys.API_KEY,
             discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
@@ -35,15 +38,20 @@ class Options extends React.Component
         );
     }
 
+    // TODO: poor naming. split/ make a promise maybe
+    // TODO: would be nice to make a chrome promise wrapper function, and just use that everywhere
     gapiAuth = () =>
     {
-        console.log('gapi initialized');
         chrome.identity.getAuthToken({interactive: true}, (token) => {
+            if (chrome.runtime.lastError !== undefined)
+            {
+                throw chrome.runtime.lastError;
+            }
+
             gapi.auth.setToken({'access_token': token});
-            console.log('token set');
             let view = new google.picker.DocsView()
                 .setIncludeFolders(true)
-                .setSelectFolderEnabled(true)
+                .setSelectFolderEnabled(false)
                 .setMode(google.picker.DocsViewMode.GRID)
                 .setMimeTypes('text/javascript');
             let picker = new google.picker.PickerBuilder()
@@ -53,38 +61,44 @@ class Options extends React.Component
                 .setOAuthToken(token)
                 .addView(view)
                 .setDeveloperKey(keys.API_KEY)
-                .setCallback(this.echoFile)
+                .setCallback(this.handleSelectedFiles)
                 .build();
             picker.setVisible(true);
         });
     }
 
-    echoFile = (data) =>
+    handleSelectedFiles = (data) =>
     {
-        if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED)
+        if (data[google.picker.Response.ACTION] != google.picker.Action.PICKED)
         {
-            const doc = data[google.picker.Response.DOCUMENTS][0];
-            const docId = doc[google.picker.Document.ID];
-            console.log(`picked ${docId}`);
-            gapi.client.drive.files.get({'fileId': docId, 'alt': 'media'})
-                .then((data) => {
-                    chrome.tabs.executeScript({
-                        'code': data['body']
-                    }, () => chrome.tabs.executeScript({'code': 'console.log(a)'}));
-                });
+            return;
         }
+
+        const scripts = data[google.picker.Response.DOCUMENTS].map((doc) => {
+            return {
+                'id': doc.id,
+                'name': doc.name,
+                'description': doc.description
+            };
+        });
+        DriveScriptsManager.addScripts(scripts);
     }
 
     render()
     {
+        // TODO: poor naming, even though it works code wise
+        let scriptsElement = (this.state.scripts.length === 0) ? 
+            'No scripts, add scripts by importing from drive.' :
+            this.state.scripts.map((script) => (
+                <p key={script}>Script: {script} (id: {script})</p>
+            ));
+
         return (
             <div>
                 <h1>Site Script Storage Options</h1>
                 <p>Manage scripts for Site Script Storage.</p>
                 <h2>Manage Existing Scripts</h2>
-                <div>
-                    some stuff here
-                </div>
+                <div>{scriptsElement}</div>
                 <h2>Import Scripts from Drive</h2>
                 <button disabled={!this.state.importButtonEnabled}
                     onClick={this.handleImportButtonClick}>Import</button>
