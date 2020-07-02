@@ -3,12 +3,9 @@ import gapi from 'gapi';
 import './popup.html';
 import keys from '../../keys.json';
 
-// The "google" variable is loaded by the gapi.load('picker') call. Unfortunately, making it an external in webpack
-// messes with the module imports since "google" isn't defined yet, so we go with a magical global variable instead.
-
-// TODO: lots of bad race conditions here with script loading.
+// TODO: lots of unused code in this file.
 window.onload = () => {
-    gapi.load('picker');
+    gapi.load('picker');  // takes a callback too
 
     document.getElementById('press').addEventListener('click', () => {
         gapi.client.init({
