@@ -11,6 +11,10 @@ module.exports = {
         'path': path.resolve(__dirname, 'gen/')
     },
 
+    'externals': {
+        'gapi': 'gapi'
+    },
+
     'module': {
         'rules': [
             {

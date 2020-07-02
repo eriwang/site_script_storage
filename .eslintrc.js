@@ -5,6 +5,9 @@ module.exports = {
         'es2020': true,
         'webextensions': true,
     },
+    'globals': {
+        'google': 'readonly'
+    },
     'extends': ['eslint:recommended', 'plugin:react/recommended'],
     'parserOptions': {
         'ecmaVersion': 11,

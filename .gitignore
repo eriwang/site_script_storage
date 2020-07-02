@@ -1,5 +1,10 @@
+# Files with sensitive info
+manifest.json
+keys.json
+
 # Build output
 gen/
 
-# Dev Directories
+# Dev Directories/ Files
 node_modules/
+*.code-workspace
