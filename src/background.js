@@ -1,4 +1,3 @@
-console.log('hello world!');
-
 chrome.runtime.onInstalled.addListener(() => {
+    console.log('extension installed.');
 });

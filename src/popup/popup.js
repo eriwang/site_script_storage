@@ -1,59 +1,73 @@
 import gapi from 'gapi';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 import './popup.html';
+import DriveScriptsManager from '../common/drive_scripts_manager.js';
 import keys from '../../keys.json';
 
-// TODO: lots of unused code in this file. Pretty much only thing that'll stay is the execution.
-window.onload = () => {
-    gapi.load('picker');  // takes a callback too
-
-    document.getElementById('press').addEventListener('click', () => {
-        gapi.client.init({
-            apiKey: keys.API_KEY,
-            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-        }).then(
-            gapiAuth,
-            (error) => console.error(error)
-        );
-    });
-};
-
-function gapiAuth()
+class Popup extends React.Component
 {
-    console.log('gapi initialized');
-    chrome.identity.getAuthToken({interactive: true}, (token) => {
-        gapi.auth.setToken({'access_token': token});
-        console.log('token set');
-        let view = new google.picker.DocsView()
-            .setIncludeFolders(true)
-            .setSelectFolderEnabled(true)
-            .setMode(google.picker.DocsViewMode.GRID)
-            .setMimeTypes('text/javascript');
-        let picker = new google.picker.PickerBuilder()
-            .enableFeature(google.picker.Feature.NAV_HIDDEN)
-            .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
-            .setAppId(keys.APP_ID)
-            .setOAuthToken(token)
-            .addView(view)
-            .setDeveloperKey(keys.API_KEY)
-            .setCallback(echoFile)
-            .build();
-        picker.setVisible(true);
-    });
-}
-
-function echoFile(data)
-{
-    if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED)
+    constructor(props)
     {
-        const doc = data[google.picker.Response.DOCUMENTS][0];
-        const docId = doc[google.picker.Document.ID];
-        console.log(`picked ${docId}`);
-        gapi.client.drive.files.get({'fileId': docId, 'alt': 'media'})
+        super(props);
+        this.state = {
+            'scripts': null
+        };
+    }
+
+    // TODO: duplicated from options.js
+    componentDidMount()
+    {
+        gapi.load('client', () => {
+            gapi.client.init({
+                apiKey: keys.API_KEY,
+                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+            }).then(() => {
+                chrome.identity.getAuthToken({interactive: true}, (token) => {
+                    if (chrome.runtime.lastError !== undefined)
+                    {
+                        throw chrome.runtime.lastError;
+                    }
+        
+                    gapi.auth.setToken({'access_token': token});
+                    DriveScriptsManager.addChangeHandler((scripts) => this.setState({'scripts': scripts}));
+                    DriveScriptsManager.loadScripts();
+                });
+            });
+        });
+    }
+
+    render()
+    {
+        if (this.state.scripts === null)
+        {
+            return 'Loading scripts data...';
+        }
+        if (this.state.scripts.length === 0)
+        {
+            return 'No scripts. Try registering scripts in the option spage.';
+        }
+
+        const scriptElements = this.state.scripts.map((s) => (
+            <div key={s.id}>
+                <p>{s.name}</p>
+                <button onClick={() => this._runScript(s.id)}>Run Script</button>
+            </div>
+        ));
+        return <div>{scriptElements}</div>;
+    }
+
+    // TODO: extension feedback that script execution is running/ done?
+    _runScript = (scriptId) =>
+    {
+        gapi.client.drive.files.get({'fileId': scriptId, 'alt': 'media'})
             .then((data) => {
                 chrome.tabs.executeScript({
                     'code': data['body']
-                }, () => chrome.tabs.executeScript({'code': 'console.log(a)'}));
+                });
             });
     }
 }
+
+ReactDOM.render(<Popup />, document.getElementById('popup'));

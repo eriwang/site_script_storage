@@ -49,11 +49,6 @@ class Options extends React.Component
         });
     }
 
-    handleImportButtonClick = () =>
-    {
-        this.gapiAuth();
-    }
-
     // TODO: Might change after auth rework? Might still be the way to go with getAuthToken to be fair
     // TODO: would be nice to make a chrome promise wrapper function, and just use that everywhere
     gapiAuth = () =>
@@ -77,13 +72,33 @@ class Options extends React.Component
                 .setOAuthToken(token)
                 .addView(view)
                 .setDeveloperKey(keys.API_KEY)
-                .setCallback(this.handleSelectedFiles)
+                .setCallback(this._handlePickerCallback)
                 .build();
             picker.setVisible(true);
         });
     }
 
-    handleSelectedFiles = (data) =>
+    render()
+    {
+        return (
+            <div>
+                <h1>Site Script Storage Options</h1>
+                <p>Manage scripts for Site Script Storage.</p>
+                <h2>Manage Existing Scripts</h2>
+                <div>{this._createScriptsDiv()}</div>
+                <h2>Import Scripts from Drive</h2>
+                <button disabled={!this.state.importButtonEnabled}
+                    onClick={this._handleImportButtonClick}>Import</button>
+            </div>
+        );
+    }
+
+    _handleImportButtonClick = () =>
+    {
+        this.gapiAuth();
+    }
+
+    _handlePickerCallback = (data) =>
     {
         if (data[google.picker.Response.ACTION] != google.picker.Action.PICKED)
         {
@@ -98,23 +113,6 @@ class Options extends React.Component
             };
         });
         DriveScriptsManager.addScripts(scripts);
-    }
-
-    // TODO: init as loading script data, but change to "no scripts" if there really aren't any
-    // TODO: might need to change more with auth
-    render()
-    {
-        return (
-            <div>
-                <h1>Site Script Storage Options</h1>
-                <p>Manage scripts for Site Script Storage.</p>
-                <h2>Manage Existing Scripts</h2>
-                <div>{this._createScriptsDiv()}</div>
-                <h2>Import Scripts from Drive</h2>
-                <button disabled={!this.state.importButtonEnabled}
-                    onClick={this.handleImportButtonClick}>Import</button>
-            </div>
-        );
     }
 
     _createScriptsDiv = () =>
