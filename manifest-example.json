@@ -4,7 +4,7 @@
     "description": "Runs user scripts on sites.",
     "manifest_version": 2,
 
-    "permissions": ["activeTab", "declarativeContent", "storage", "syncFileSystem"],
+    "permissions": ["activeTab", "declarativeContent", "identity", "storage"],
 
     "options_page": "gen/options.html",
     "background": {
@@ -13,5 +13,15 @@
     },
     "page_action": {
         "default_popup": "gen/popup.html"
-    }
+    },
+
+    "content_security_policy": "script-src 'self' https://apis.google.com/; object-src 'self'",
+
+    // Some of the below is sensitive information. Adding the fields/ where to find them to help with clarity.
+    "oauth2": {
+        "client_id": "<found in google api developer console>",
+        "scopes": ["https://www.googleapis.com/auth/drive.readonly"]
+    },
+
+    "key": "<found in old view of chrome web store developer dashboard under more info>"
 }
