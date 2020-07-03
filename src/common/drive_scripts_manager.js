@@ -1,3 +1,5 @@
+import gapi from 'gapi';
+
 class DriveScriptsManagerClass
 {
     constructor()
@@ -11,11 +13,6 @@ class DriveScriptsManagerClass
         this._scriptsChangeHandlers.push(handler);
     }
 
-    /* TODO: 
-     * I'd like to store just the ID/ domains (i.e. extension-specific info) here. If I want the name/ description of
-     * the script I need to query the Drive API. However, if I'm not authenticated, need to make sure the user knows,
-     * probably by way of some text in the "manage" section telling user to auth.
-     */
     loadScripts = () =>
     {
         chrome.storage.sync.get(['scripts'], (result) => {
@@ -24,31 +21,49 @@ class DriveScriptsManagerClass
                 throw chrome.runtime.lastError;
             }
 
-            this._setScripts(('scripts' in result) ? result['scripts'] : []);
+            this._loadAndSetScriptsFromIds(('scripts' in result) ? result.scripts : []);
         });
     }
 
     // TODO: promises
-    addScripts = (scripts) =>
+    addScripts = (scriptIds) =>
     {
         chrome.storage.sync.get(['scripts'], (result) => {
             if (chrome.runtime.lastError !== undefined)
             {
                 throw chrome.runtime.lastError;
             }
-            const storageScripts = ('scripts' in result) ? result['scripts'] : [];
-            const newScriptsSet = new Set(storageScripts);
-            scripts.forEach((s) => newScriptsSet.add(s['id']));
+            const storageScriptIds = ('scripts' in result) ? result.scripts : [];
+            const newScriptIdsSet = new Set(storageScriptIds);
+            scriptIds.forEach((s) => newScriptIdsSet.add(s.id));
 
-            const newScriptsArray = Array.from(newScriptsSet);
-            chrome.storage.sync.set({'scripts':newScriptsArray}, () => {
+            const newScriptIdsArray = Array.from(newScriptIdsSet);
+            chrome.storage.sync.set({'scripts': newScriptIdsArray}, () => {
                 if (chrome.runtime.lastError !== undefined)
                 {
                     throw chrome.runtime.lastError;
                 }
 
-                this._setScripts(newScriptsArray);
+                this._loadAndSetScriptsFromIds(newScriptIdsArray);
             });
+        });
+    }
+
+    _loadAndSetScriptsFromIds = (scriptIds) =>
+    {
+        if (scriptIds.length === 0)
+        {
+            this._setScripts([]);
+            return;
+        }
+
+        const getFilePromises = scriptIds.map(
+            (sId) => gapi.client.drive.files.get({'fileId': sId, 'fields': 'name, description, id'})
+        );
+
+        Promise.all(getFilePromises).then((results) => {
+            const scripts = results.map((r) => JSON.parse(r.body));
+            this._setScripts(scripts);
         });
     }
 
