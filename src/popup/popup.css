@@ -1,0 +1,25 @@
+#popup
+{
+    width: 400px;
+    height: 400px;
+    padding-left: 10px;
+}
+
+.scriptPlay
+{
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.playBtn
+{
+    margin-right: 5px;
+}
+
+.scriptParagraph
+{
+    margin: 0;
+    padding: 0;
+}
