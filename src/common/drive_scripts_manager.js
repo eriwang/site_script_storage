@@ -1,5 +1,7 @@
 import gapi from 'gapi';
 
+import {ChromeStorage} from '../common/chrome_api.js';
+
 class DriveScriptsManagerClass
 {
     constructor()
@@ -15,38 +17,23 @@ class DriveScriptsManagerClass
 
     loadScripts = () =>
     {
-        chrome.storage.sync.get(['scripts'], (result) => {
-            if (chrome.runtime.lastError !== undefined)
-            {
-                throw chrome.runtime.lastError;
-            }
-
-            this._loadAndSetScriptsFromIds(('scripts' in result) ? result.scripts : []);
-        });
+        ChromeStorage.get('scripts')
+            .then((result) => this._loadAndSetScriptsFromIds((result === undefined) ? [] : result));
     }
 
-    // TODO: promises
     addScripts = (scriptIds) =>
     {
-        chrome.storage.sync.get(['scripts'], (result) => {
-            if (chrome.runtime.lastError !== undefined)
-            {
-                throw chrome.runtime.lastError;
-            }
-            const storageScriptIds = ('scripts' in result) ? result.scripts : [];
-            const newScriptIdsSet = new Set(storageScriptIds);
-            scriptIds.forEach((s) => newScriptIdsSet.add(s.id));
+        let newScriptIdsArray = [];
+        ChromeStorage.get('scripts')
+            .then((result) => {
+                const storageScriptIds = (result === undefined) ? [] : result;
+                const newScriptIdsSet = new Set(storageScriptIds);
+                scriptIds.forEach((s) => newScriptIdsSet.add(s.id));
 
-            const newScriptIdsArray = Array.from(newScriptIdsSet);
-            chrome.storage.sync.set({'scripts': newScriptIdsArray}, () => {
-                if (chrome.runtime.lastError !== undefined)
-                {
-                    throw chrome.runtime.lastError;
-                }
-
-                this._loadAndSetScriptsFromIds(newScriptIdsArray);
-            });
-        });
+                newScriptIdsArray = Array.from(newScriptIdsSet);
+                return ChromeStorage.set('scripts', newScriptIdsArray);
+            })
+            .then(() => this._loadAndSetScriptsFromIds(newScriptIdsArray));
     }
 
     _loadAndSetScriptsFromIds = (scriptIds) =>

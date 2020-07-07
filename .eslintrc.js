@@ -4,7 +4,6 @@ module.exports = {
         'node': true,
         'browser': true,
         'es2020': true,
-        'webextensions': true,
     },
     'globals': {
         'google': 'readonly'

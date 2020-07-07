@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import './popup.html';
+import {ChromeTabs, ChromeIdentity} from '../common/chrome_api.js';
 import DriveScriptsManager from '../common/drive_scripts_manager.js';
 import keys from '../../keys.json';
 
@@ -16,25 +17,31 @@ class Popup extends React.Component
         };
     }
 
+    // Google auth steps:
+    // - load client and possibly picker lib
+    // - gapi.client.init
+    // - chrome.identity.getAuthToken (interactive: false), have this be a promise
+    //      - if token exists, gapi.auth.setToken
+    //      - if token undefined, calling class handles
+    // - have a path for interactive: true
+    // - should be a singleton to make life easy
+    // - calling class will call "loadLibsAndAuth". If success, good to use gapi. If not, have a path to auth w/ user
+
     // TODO: duplicated from options.js
     componentDidMount()
     {
         gapi.load('client', () => {
-            gapi.client.init({
-                apiKey: keys.API_KEY,
-                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-            }).then(() => {
-                chrome.identity.getAuthToken({interactive: true}, (token) => {
-                    if (chrome.runtime.lastError !== undefined)
-                    {
-                        throw chrome.runtime.lastError;
-                    }
-        
+            let initArgs = {
+                'apiKey': keys.API_KEY,
+                'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+            };
+            gapi.client.init(initArgs)
+                .then(() => ChromeIdentity.getAuthToken(true))
+                .then((token) => {
                     gapi.auth.setToken({'access_token': token});
                     DriveScriptsManager.addChangeHandler((scripts) => this.setState({'scripts': scripts}));
                     DriveScriptsManager.loadScripts();
                 });
-            });
         });
     }
 
@@ -62,11 +69,7 @@ class Popup extends React.Component
     _runScript = (scriptId) =>
     {
         gapi.client.drive.files.get({'fileId': scriptId, 'alt': 'media'})
-            .then((data) => {
-                chrome.tabs.executeScript({
-                    'code': data['body']
-                });
-            });
+            .then((data) => ChromeTabs.executeScript(data['body']));
     }
 }
 
