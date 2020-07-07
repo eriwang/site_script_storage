@@ -6,13 +6,19 @@ import DriveScriptsManager from '../common/drive_scripts_manager.js';
 import GapiLibsAndAuth from '../common/gapi_auth.js';
 import keys from '../../keys.json';
 
+const AUTH_STATUS = {
+    'LOADING': 0,
+    'FAILED': 1,
+    'SUCCESSFUL': 2
+};
+
 class Options extends React.Component
 {
     constructor(props)
     {
         super(props);
         this.state = {
-            'importButtonEnabled': false,
+            'authStatus': AUTH_STATUS.LOADING,
             'scripts': null
         };
     }
@@ -23,13 +29,11 @@ class Options extends React.Component
             .then(() => {
                 if (GapiLibsAndAuth.getAuthToken() === null)
                 {
-                    console.error('Automatic auth failed!');
+                    this.setState({'authStatus': AUTH_STATUS.FAILED});
                     return;
                 }
 
-                DriveScriptsManager.addChangeHandler((scripts) => this.setState({'scripts': scripts}));
-                DriveScriptsManager.loadScripts();
-                this.setState({'importButtonEnabled': true});
+                this._onAuthSuccessLoadAndShowUi();
             });
     }
 
@@ -39,13 +43,46 @@ class Options extends React.Component
             <div>
                 <h1>Site Script Storage Options</h1>
                 <p>Manage scripts for Site Script Storage.</p>
-                <h2>Manage Existing Scripts</h2>
-                <div>{this._createScriptsDiv()}</div>
-                <h2>Import Scripts from Drive</h2>
-                <button disabled={!this.state.importButtonEnabled}
-                    onClick={this._handleImportButtonClick}>Import</button>
+                {this._getContentUsingAuthStatus()}
             </div>
         );
+    }
+
+    _getContentUsingAuthStatus = () =>
+    {
+        switch (this.state.authStatus)
+        {
+        case AUTH_STATUS.LOADING:
+            return <div><p>Authenticating...</p></div>;
+        case AUTH_STATUS.FAILED:
+            return (
+                <div>
+                    <p>Authentication failed. Click button below to allow access to the extension.</p>
+                    <button onClick={this._handleAllowAccessButtonClick}>Allow access</button>
+                </div>
+            );
+        case AUTH_STATUS.SUCCESSFUL:
+            return (
+                <div>
+                    <h2>Manage Existing Scripts</h2>
+                    <div>{this._createScriptsDiv()}</div>
+                    <h2>Import Scripts from Drive</h2>
+                    <button onClick={this._handleImportButtonClick}>Import</button>
+                </div>
+            );
+        }
+    }
+
+    _onAuthSuccessLoadAndShowUi = () =>
+    {
+        this.setState({'authStatus': AUTH_STATUS.SUCCESSFUL});
+        DriveScriptsManager.addChangeHandler((scripts) => this.setState({'scripts': scripts}));
+        DriveScriptsManager.loadScripts();
+    }
+
+    _handleAllowAccessButtonClick = () =>
+    {
+        GapiLibsAndAuth.auth(true).then(this._onAuthSuccessLoadAndShowUi);
     }
 
     // The "google" variable is loaded by the gapi.load('picker') call, which is loaded in GapiLibsAndAuth.load. 
