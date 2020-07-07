@@ -3,9 +3,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import './popup.html';
-import {ChromeTabs, ChromeIdentity} from '../common/chrome_api.js';
+import {ChromeTabs} from '../common/chrome_api.js';
 import DriveScriptsManager from '../common/drive_scripts_manager.js';
-import keys from '../../keys.json';
+import GapiLibsAndAuth from '../common/gapi_auth.js';
 
 class Popup extends React.Component
 {
@@ -13,47 +13,39 @@ class Popup extends React.Component
     {
         super(props);
         this.state = {
+            'failedAuth': false,
             'scripts': null
         };
     }
 
-    // Google auth steps:
-    // - load client and possibly picker lib
-    // - gapi.client.init
-    // - chrome.identity.getAuthToken (interactive: false), have this be a promise
-    //      - if token exists, gapi.auth.setToken
-    //      - if token undefined, calling class handles
-    // - have a path for interactive: true
-    // - should be a singleton to make life easy
-    // - calling class will call "loadLibsAndAuth". If success, good to use gapi. If not, have a path to auth w/ user
-
-    // TODO: duplicated from options.js
     componentDidMount()
     {
-        gapi.load('client', () => {
-            let initArgs = {
-                'apiKey': keys.API_KEY,
-                'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
-            };
-            gapi.client.init(initArgs)
-                .then(() => ChromeIdentity.getAuthToken(true))
-                .then((token) => {
-                    gapi.auth.setToken({'access_token': token});
-                    DriveScriptsManager.addChangeHandler((scripts) => this.setState({'scripts': scripts}));
-                    DriveScriptsManager.loadScripts();
-                });
-        });
+        GapiLibsAndAuth.loadAndAuthNoUi([])
+            .then(() => {
+                if (GapiLibsAndAuth.getAuthToken() === null)
+                {
+                    this.setState({'failedAuth': true});
+                    return;
+                }
+
+                DriveScriptsManager.addChangeHandler((scripts) => this.setState({'scripts': scripts}));
+                DriveScriptsManager.loadScripts();
+            });
     }
 
     render()
     {
+        if (this.state.failedAuth)
+        {
+            return 'Extension authentication failed. Allow extension access in the options page.';
+        }
         if (this.state.scripts === null)
         {
             return 'Loading scripts data...';
         }
         if (this.state.scripts.length === 0)
         {
-            return 'No scripts. Try registering scripts in the option spage.';
+            return 'No scripts. Try registering scripts in the options page.';
         }
 
         const scriptElements = this.state.scripts.map((s) => (

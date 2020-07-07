@@ -31,7 +31,7 @@ class ChromeIdentity
     {
         return new Promise((resolve) => {
             chrome.identity.getAuthToken({'interactive': interactive}, (result) => {
-                _validateChromeLastError();
+                // We don't validate chrome.runtime.lastError here, as it exists if OAuth hasn't been granted yet.
                 resolve(result);
             });
         });
@@ -55,6 +55,7 @@ function _validateChromeLastError()
 {
     if (chrome.runtime.lastError !== undefined)
     {
+        console.error('Chrome error:', chrome.runtime.lastError.message);
         throw chrome.runtime.lastError;
     }
 }

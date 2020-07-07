@@ -1,14 +1,10 @@
-import gapi from 'gapi';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
 import './options.html';
-import {ChromeIdentity} from '../common/chrome_api.js';
 import DriveScriptsManager from '../common/drive_scripts_manager.js';
+import GapiLibsAndAuth from '../common/gapi_auth.js';
 import keys from '../../keys.json';
-
-// The "google" variable is loaded by the gapi.load('picker') call. Unfortunately, making it an external in webpack
-// messes with the module imports since "google" isn't defined yet, so we go with a magical global variable instead.
 
 class Options extends React.Component
 {
@@ -23,27 +19,18 @@ class Options extends React.Component
 
     componentDidMount()
     {
-        gapi.load('client:picker', () => {
-            /* TODO:
-             * This is a bit of a messy hack. The Drive API requires gapi.auth.setToken to be set before I can
-             * find files, but it's not great for the user to be prompted for auth immediately. I'd like to fix
-             * this weirdness with the auth process rethink.
-             * Ideally, if I'm not authenticated, I'll show the user, and load this after auth is complete.
-             */
-            let initArgs = {
-                apiKey: keys.API_KEY,
-                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
-            };
-            gapi.client.init(initArgs)
-                .then(() => ChromeIdentity.getAuthToken(true))
-                .then((token) => {
-                    gapi.auth.setToken({'access_token': token});
-                    DriveScriptsManager.addChangeHandler((scripts) => this.setState({'scripts': scripts}));
-                    DriveScriptsManager.loadScripts();
+        GapiLibsAndAuth.loadAndAuthNoUi(['picker'])
+            .then(() => {
+                if (GapiLibsAndAuth.getAuthToken() === null)
+                {
+                    console.error('Automatic auth failed!');
+                    return;
+                }
 
-                    this.setState({'importButtonEnabled': true});
-                });
-        });
+                DriveScriptsManager.addChangeHandler((scripts) => this.setState({'scripts': scripts}));
+                DriveScriptsManager.loadScripts();
+                this.setState({'importButtonEnabled': true});
+            });
     }
 
     render()
@@ -61,28 +48,26 @@ class Options extends React.Component
         );
     }
 
-    // TODO: Might change a bit after auth rework? Might still be the way to go with getAuthToken to be fair
+    // The "google" variable is loaded by the gapi.load('picker') call, which is loaded in GapiLibsAndAuth.load. 
+    // Unfortunately, making it an external in webpack messes with the module imports since "google" isn't defined yet,
+    // so we end up with a magical global variable.
     _handleImportButtonClick = () =>
     {
-        ChromeIdentity.getAuthToken(true)
-            .then((token) => {
-                gapi.auth.setToken({'access_token': token});
-                let view = new google.picker.DocsView()
-                    .setIncludeFolders(true)
-                    .setSelectFolderEnabled(false)
-                    .setMode(google.picker.DocsViewMode.GRID)
-                    .setMimeTypes('text/javascript');
-                let picker = new google.picker.PickerBuilder()
-                    .enableFeature(google.picker.Feature.NAV_HIDDEN)
-                    .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
-                    .setAppId(keys.APP_ID)
-                    .setOAuthToken(token)
-                    .addView(view)
-                    .setDeveloperKey(keys.API_KEY)
-                    .setCallback(this._handlePickerCallback)
-                    .build();
-                picker.setVisible(true);
-            });
+        let view = new google.picker.DocsView()
+            .setIncludeFolders(true)
+            .setSelectFolderEnabled(false)
+            .setMode(google.picker.DocsViewMode.GRID)
+            .setMimeTypes('text/javascript');
+        let picker = new google.picker.PickerBuilder()
+            .enableFeature(google.picker.Feature.NAV_HIDDEN)
+            .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+            .setAppId(keys.APP_ID)
+            .setOAuthToken(GapiLibsAndAuth.getAuthToken())
+            .addView(view)
+            .setDeveloperKey(keys.API_KEY)
+            .setCallback(this._handlePickerCallback)
+            .build();
+        picker.setVisible(true);
     }
 
     _handlePickerCallback = (data) =>
