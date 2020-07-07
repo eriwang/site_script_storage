@@ -11,7 +11,8 @@ module.exports = {
     },
 
     'externals': {
-        'gapi': 'gapi'
+        'gapi': 'gapi',
+        'chrome': 'chrome'
     },
 
     'module': {
