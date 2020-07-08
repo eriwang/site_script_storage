@@ -7,6 +7,7 @@ import './popup.html';
 import {ChromeTabs} from '../common/chrome_api.js';
 import DriveScriptsManager from '../common/drive_scripts_manager.js';
 import GapiLibsAndAuth from '../common/gapi_auth.js';
+import {PlayButton} from '../common/svg_buttons.js';
 
 class Popup extends React.Component
 {
@@ -87,45 +88,6 @@ class Popup extends React.Component
                 scriptIdUpdateState[key] = false;
                 this.setState(scriptIdUpdateState);
             });
-    }
-}
-
-// SVG sourced from https://feathericons.com/
-class PlayButton extends React.Component
-{
-    constructor(props)
-    {
-        super(props);
-
-        this.state = {
-            'mouseInside': false,
-        };
-    }
-
-    render()
-    {
-        let fillColor, opacity;
-        if (this.props.isRunning)
-        {
-            fillColor = 'black';
-            opacity = 0.5;
-        }
-        else
-        {
-            fillColor = (this.state.mouseInside) ? 'black' : 'none';
-            opacity = 1;
-        }
-
-        return (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" strokeLinecap="round"
-                strokeLinejoin="round" strokeWidth="2" stroke="black" className="playBtn"
-                fill={fillColor} opacity={opacity}
-                onMouseEnter={() => this.setState({'mouseInside': true})}
-                onMouseLeave={() => this.setState({'mouseInside': false})}
-                onClick={this.props.onClick}>
-                <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
-        );
     }
 }
 

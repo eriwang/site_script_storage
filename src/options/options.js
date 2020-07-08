@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import './options.css';
 import './options.html';
 import DriveScriptsManager from '../common/drive_scripts_manager.js';
 import GapiLibsAndAuth from '../common/gapi_auth.js';
