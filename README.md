@@ -2,7 +2,11 @@
 
 A Google Chrome extension that lets you import .js files from Google Drive, and run them as content scripts on websites.
 
+Options page:
+
 ![options](readme_images/options.png)
+
+Script runner:
 
 ![popup](readme_images/popup.png)
 
