@@ -27,7 +27,7 @@ class DriveScriptsManagerClass
         ChromeStorage.get('scripts')
             .then((result) => {
                 const storageScriptIds = (result === undefined) ? [] : result;
-                const newScriptIdsSet = new Set(storageScriptIds);
+                let newScriptIdsSet = new Set(storageScriptIds);
                 scriptIds.forEach((sId) => newScriptIdsSet.add(sId));
 
                 newScriptIdsArray = Array.from(newScriptIdsSet);
