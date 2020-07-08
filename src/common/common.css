@@ -1,0 +1,9 @@
+.svg-button, button
+{
+    cursor: pointer;
+}
+
+.help
+{
+    font-style: italic;
+}

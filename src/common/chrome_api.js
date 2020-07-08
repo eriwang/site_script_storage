@@ -31,7 +31,15 @@ class ChromeIdentity
     {
         return new Promise((resolve) => {
             chrome.identity.getAuthToken({'interactive': interactive}, (result) => {
-                // We don't validate chrome.runtime.lastError here, as it exists if OAuth hasn't been granted yet.
+                // OAuth2 failure is fine here, on a first use of the extension it won't have been granted yet.
+                if (chrome.runtime.lastError !== undefined)
+                {
+                    if (chrome.runtime.lastError.message !== 'OAuth2 not granted or revoked.')
+                    {
+                        throw chrome.runtime.lastError;
+                    }
+                }
+
                 resolve(result);
             });
         });
@@ -56,6 +64,7 @@ function _validateChromeLastError()
     if (chrome.runtime.lastError !== undefined)
     {
         console.error('Chrome error:', chrome.runtime.lastError.message);
+        console.error(new Error().stack);
         throw chrome.runtime.lastError;
     }
 }

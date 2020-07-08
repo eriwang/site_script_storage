@@ -27,10 +27,37 @@ class DriveScriptsManagerClass
         ChromeStorage.get('scripts')
             .then((result) => {
                 const storageScriptIds = (result === undefined) ? [] : result;
-                const newScriptIdsSet = new Set(storageScriptIds);
-                scriptIds.forEach((s) => newScriptIdsSet.add(s.id));
+                let newScriptIdsSet = new Set(storageScriptIds);
+                scriptIds.forEach((sId) => newScriptIdsSet.add(sId));
 
                 newScriptIdsArray = Array.from(newScriptIdsSet);
+                return ChromeStorage.set('scripts', newScriptIdsArray);
+            })
+            .then(() => this._loadAndSetScriptsFromIds(newScriptIdsArray));
+    }
+
+    deleteScript = (scriptId) =>
+    {
+        let newScriptIdsArray = [];
+        return ChromeStorage.get('scripts')
+            .then((storageScriptIds) => {
+                let foundScript = false;
+                for (const ssId of storageScriptIds)
+                {
+                    if (ssId === scriptId)
+                    {
+                        foundScript = true;
+                    }
+                    else
+                    {
+                        newScriptIdsArray.push(ssId);
+                    }
+                }
+                
+                if (!foundScript)
+                {
+                    throw `Did not find script with id ${scriptId} in storage. Scripts present: ${storageScriptIds}`;
+                }
                 return ChromeStorage.set('scripts', newScriptIdsArray);
             })
             .then(() => this._loadAndSetScriptsFromIds(newScriptIdsArray));
@@ -45,10 +72,13 @@ class DriveScriptsManagerClass
         }
 
         const getFilePromises = scriptIds.map(
-            (sId) => gapi.client.drive.files.get({'fileId': sId, 'fields': 'name, description, id'})
+            (sId) => gapi.client.drive.files.get({
+                'fileId': sId, 
+                'fields': 'name, description, id, webViewLink'
+            })
         );
 
-        Promise.all(getFilePromises).then((results) => {
+        return Promise.all(getFilePromises).then((results) => {
             const scripts = results.map((r) => JSON.parse(r.body));
             this._setScripts(scripts);
         });
