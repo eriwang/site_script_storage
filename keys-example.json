@@ -1,0 +1,6 @@
+{
+    "API_KEY": "<found in google api developer console, APIs & Services -> Credentials -> API Keys -> Key>",
+    "APP_ID": "<found in google api developer console, IAM & Admin -> Settings -> Project Number>",
+    "OAUTH2_CLIENT_ID": "<found in google api developer console, APIs & Services -> Credentials -> OAuth 2.0 Client IDs -> Client ID>",
+    "MANIFEST_KEY": "<found in old view of chrome web store developer dashboard under more info>"
+}
