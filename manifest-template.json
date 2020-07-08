@@ -6,18 +6,17 @@
 
     "permissions": ["activeTab", "declarativeContent", "identity", "storage"],
 
-    "options_page": "gen/options.html",
+    "options_page": "options.html",
     "background": {
-        "scripts": ["gen/background.js"],
+        "scripts": ["background.js"],
         "persistent": false
     },
-    "page_action": {
-        "default_popup": "gen/popup.html"
+    "browser_action": {
+        "default_popup": "popup.html"
     },
 
     "content_security_policy": "script-src 'self' https://apis.google.com/; object-src 'self'",
 
-    // Some of the below is sensitive information. Adding the fields/ where to find them to help with clarity.
     "oauth2": {
         "client_id": "<found in google api developer console>",
         "scopes": ["https://www.googleapis.com/auth/drive.readonly"]
