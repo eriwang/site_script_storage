@@ -1,5 +1,6 @@
 import React from 'react';
 
+import {CrossButton, DropdownButton} from '../common/svg_buttons.js';
 import DriveScriptsManager from '../common/drive_scripts_manager.js';
 import launchGoogleDrivePicker from './google_drive_picker.js';
 
@@ -43,7 +44,7 @@ class OptionsAuthSuccessful extends React.Component
         }
 
         const scriptElements = this.state.scripts.map((s) => (
-            <p key={s.id}>Script: {s.name}, id: {s.id}, desc: {s.description}</p>
+            <Script key={s.id} name={s.name} id={s.id} description={s.description} />
         ));
         return <div>{scriptElements}</div>;
     }
@@ -59,6 +60,26 @@ class OptionsAuthSuccessful extends React.Component
 
                 DriveScriptsManager.addScripts(scripts);
             });
+    }
+}
+
+class Script extends React.Component
+{
+    constructor(props)
+    {
+        super(props);
+    }
+
+    render()
+    {
+        return (
+            <div>
+                <p>Script: {this.props.name}</p>
+                <p>Desc: {this.props.description}</p>
+                <CrossButton/>
+                <DropdownButton/>
+            </div>
+        );
     }
 }
 

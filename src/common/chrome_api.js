@@ -31,7 +31,7 @@ class ChromeIdentity
     {
         return new Promise((resolve) => {
             chrome.identity.getAuthToken({'interactive': interactive}, (result) => {
-                // OAuth2 failure is fine here, on a first use it won't have been granted yet.
+                // OAuth2 failure is fine here, on a first use of the extension it won't have been granted yet.
                 if (chrome.runtime.lastError !== undefined)
                 {
                     if (chrome.runtime.lastError.message !== 'OAuth2 not granted or revoked.')

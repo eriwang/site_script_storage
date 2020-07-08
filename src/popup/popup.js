@@ -82,6 +82,8 @@ class Popup extends React.Component
         scriptIdUpdateState[key] = true;
         this.setState(scriptIdUpdateState);
 
+        // TODO: if _validateChromeLastError fires, a .catch won't actually catch the error. Code-wise I'll need to do
+        // a bit of cleanup legwork to get the promise reject called properly.
         gapi.client.drive.files.get({'fileId': scriptId, 'alt': 'media'})
             .then((data) => ChromeTabs.executeScript(data['body']))
             .then(() => {
