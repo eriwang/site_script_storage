@@ -43,6 +43,20 @@ class SvgButton extends React.Component
     }
 }
 
+// check-square feather icon
+class CheckButton extends React.Component
+{
+    render()
+    {
+        return (
+            <SvgButton onClick={this.props.onClick}>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                <polyline points="9 11 12 14 22 4" />
+            </SvgButton>
+        );
+    }
+}
+
 // x-square feather icon
 class CrossButton extends React.Component
 {
@@ -105,4 +119,4 @@ class PlayButton extends React.Component
     }
 }
 
-export {CrossButton, DropdownButton, EditButton, PlayButton};
+export {CheckButton, CrossButton, DropdownButton, EditButton, PlayButton};

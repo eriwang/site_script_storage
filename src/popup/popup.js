@@ -47,6 +47,11 @@ class Popup extends React.Component
         return (
             <div>
                 <h2>Site Script Storage Runner</h2>
+                <p className="help">
+                    Click on the play button to run a script. Scripts have access to state of previously run scripts,
+                    e.g. if you define a variable &quot;a&quot; in the first script you run, you will be able to use it
+                    in the following scripts.
+                </p>
                 {this._createContentDivContents()}
             </div>
         );

@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {CrossButton, DropdownButton, EditButton} from '../common/svg_buttons.js';
+import ConfirmationModal from './confirmation_modal.js';
 import DriveScriptsManager from '../common/drive_scripts_manager.js';
 import launchGoogleDrivePicker from './google_drive_picker.js';
 
@@ -10,7 +11,8 @@ class OptionsAuthSuccessful extends React.Component
     {
         super(props);
         this.state = {
-            'scripts': null
+            'scripts': null,
+            'confirmDeleteScript': null
         };
     }
 
@@ -22,6 +24,13 @@ class OptionsAuthSuccessful extends React.Component
 
     render()
     {
+        const confirmationModal = (this.state.confirmDeleteScript === null) ? null : (
+            <ConfirmationModal
+                onConfirm={this._handleScriptConfirmDelete}
+                header="Confirm Script Delete"
+                text={`Are you sure you want to delete ${this.state.confirmDeleteScript.name}?`}/>
+        );
+
         return (
             <div>
                 <h2>Manage Existing Scripts</h2>
@@ -29,6 +38,7 @@ class OptionsAuthSuccessful extends React.Component
                 <h2>Import Scripts from Drive</h2>
                 <p className="help">You can select multiple .js files at once by using ctrl/ shift.</p>
                 <button onClick={this._handleImportButtonClick}>Import</button>
+                {confirmationModal}
             </div>
         );
     }
@@ -45,7 +55,7 @@ class OptionsAuthSuccessful extends React.Component
         }
 
         const scriptElements = this.state.scripts.map((s) => (
-            <Script key={s.id} scriptObj={s} />
+            <Script key={s.id} scriptObj={s} onDeleteClick={() => this.setState({'confirmDeleteScript': s})} />
         ));
         return (
             <div>
@@ -69,6 +79,18 @@ class OptionsAuthSuccessful extends React.Component
 
                 DriveScriptsManager.addScripts(scripts);
             });
+    }
+
+    _handleScriptConfirmDelete = (isConfirm) =>
+    {
+        if (!isConfirm)
+        {
+            this.setState({'confirmDeleteScript': null});
+            return;
+        }
+
+        DriveScriptsManager.deleteScript(this.state.confirmDeleteScript.id)
+            .then(() => this.setState({'confirmDeleteScript': null}));
     }
 }
 
@@ -95,7 +117,7 @@ class Script extends React.Component
                     <p>{script.name}</p>
                     <div className="script-row-shown-buttons">
                         <EditButton onClick={() => window.open(script.webViewLink, '_blank')}/>
-                        <CrossButton />
+                        <CrossButton onClick={this.props.onDeleteClick} />
                         <DropdownButton isDropped={this.state.showDetails} 
                             onClick={() => this.setState((prevState) => ({'showDetails': !prevState.showDetails}))}/>
                     </div>

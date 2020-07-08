@@ -36,6 +36,33 @@ class DriveScriptsManagerClass
             .then(() => this._loadAndSetScriptsFromIds(newScriptIdsArray));
     }
 
+    deleteScript = (scriptId) =>
+    {
+        let newScriptIdsArray = [];
+        return ChromeStorage.get('scripts')
+            .then((storageScriptIds) => {
+                let foundScript = false;
+                for (const ssId of storageScriptIds)
+                {
+                    if (ssId === scriptId)
+                    {
+                        foundScript = true;
+                    }
+                    else
+                    {
+                        newScriptIdsArray.push(ssId);
+                    }
+                }
+                
+                if (!foundScript)
+                {
+                    throw `Did not find script with id ${scriptId} in storage. Scripts present: ${storageScriptIds}`;
+                }
+                return ChromeStorage.set('scripts', newScriptIdsArray);
+            })
+            .then(() => this._loadAndSetScriptsFromIds(newScriptIdsArray));
+    }
+
     _loadAndSetScriptsFromIds = (scriptIds) =>
     {
         if (scriptIds.length === 0)
@@ -51,7 +78,7 @@ class DriveScriptsManagerClass
             })
         );
 
-        Promise.all(getFilePromises).then((results) => {
+        return Promise.all(getFilePromises).then((results) => {
             const scripts = results.map((r) => JSON.parse(r.body));
             this._setScripts(scripts);
         });
