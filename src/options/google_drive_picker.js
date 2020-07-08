@@ -19,26 +19,20 @@ function launchGoogleDrivePicker()
             .setOAuthToken(GapiLibsAndAuth.getAuthToken())
             .addView(view)
             .setDeveloperKey(keys.API_KEY)
-            .setCallback((data) => resolve(_convertPickerDocsToScriptObjects(data)))
+            .setCallback((data) => resolve(_convertPickerDocsToScriptIds(data)))
             .build();
         picker.setVisible(true);
     });
 }
 
-function _convertPickerDocsToScriptObjects(data)
+function _convertPickerDocsToScriptIds(data)
 {
     if (data[google.picker.Response.ACTION] != google.picker.Action.PICKED)
     {
         return null;
     }
 
-    return data[google.picker.Response.DOCUMENTS].map((doc) => {
-        return {
-            'id': doc.id,
-            'name': doc.name,
-            'description': doc.description
-        };
-    });
+    return data[google.picker.Response.DOCUMENTS].map((doc) => doc.id);
 }
 
 export default launchGoogleDrivePicker;

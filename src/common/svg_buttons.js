@@ -33,7 +33,7 @@ class SvgButton extends React.Component
         return (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height="24" viewBox="0 0 24 24" stroke="currentColor" 
                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                fill={fillColor} opacity={opacity}
+                fill={fillColor} opacity={opacity} className="svg-button"
                 onMouseEnter={() => this.setState({'mouseInside': true})}
                 onMouseLeave={() => this.setState({'mouseInside': false})}
                 onClick={this.props.onClick}>
@@ -68,9 +68,25 @@ class DropdownButton extends React.Component
 
     render()
     {
+        const transform = (this.props.isDropped) ? 'scale(1, -1)' : '';
         return (
             <SvgButton size="16" onClick={this.props.onClick}>
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                    transform={transform} transform-origin="center"/>
+            </SvgButton>
+        );
+    }
+}
+
+// edit feather icon
+class EditButton extends React.Component
+{
+    render()
+    {
+        return (
+            <SvgButton onClick={this.props.onClick}>
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
             </SvgButton>
         );
     }
@@ -83,10 +99,10 @@ class PlayButton extends React.Component
     {
         return (
             <SvgButton onClick={this.props.onClick} isActive={this.props.isRunning}>
-                <polygon points="5 3 19 12 5 21 5 3" />
+                <polygon points="5 3 19 12 5 21 5 3"/>
             </SvgButton>
         );
     }
 }
 
-export {CrossButton, DropdownButton, PlayButton};
+export {CrossButton, DropdownButton, EditButton, PlayButton};

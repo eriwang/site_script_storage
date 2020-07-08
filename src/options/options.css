@@ -4,3 +4,34 @@
     max-width: 80%;
     margin: auto;
 }
+
+.help
+{
+    font-style: italic;
+}
+
+.script-row
+{
+    margin-bottom: 20px;
+}
+
+.script-row-shown
+{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.script-row-shown-buttons
+{
+    width: 40%;
+
+    display: flex;
+    flex-direction: row;
+}
+
+.script-row-shown-buttons > *
+{
+    margin-right: 10px;
+}

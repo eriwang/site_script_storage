@@ -28,7 +28,7 @@ class DriveScriptsManagerClass
             .then((result) => {
                 const storageScriptIds = (result === undefined) ? [] : result;
                 const newScriptIdsSet = new Set(storageScriptIds);
-                scriptIds.forEach((s) => newScriptIdsSet.add(s.id));
+                scriptIds.forEach((sId) => newScriptIdsSet.add(sId));
 
                 newScriptIdsArray = Array.from(newScriptIdsSet);
                 return ChromeStorage.set('scripts', newScriptIdsArray);
@@ -45,7 +45,10 @@ class DriveScriptsManagerClass
         }
 
         const getFilePromises = scriptIds.map(
-            (sId) => gapi.client.drive.files.get({'fileId': sId, 'fields': 'name, description, id'})
+            (sId) => gapi.client.drive.files.get({
+                'fileId': sId, 
+                'fields': 'name, description, id, webViewLink'
+            })
         );
 
         Promise.all(getFilePromises).then((results) => {

@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import '../common/common.css';
 import './options.css';
 import './options.html';
 import GapiLibsAndAuth from '../common/gapi_auth.js';
@@ -39,7 +40,7 @@ class Options extends React.Component
         return (
             <div>
                 <h1>Site Script Storage Options</h1>
-                <p>Manage scripts for Site Script Storage.</p>
+                <p className="help">Manage scripts for Site Script Storage.</p>
                 {this._getContentUsingAuthStatus()}
             </div>
         );

@@ -2,6 +2,7 @@ import gapi from 'gapi';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import '../common/common.css';
 import './popup.css';
 import './popup.html';
 import {ChromeTabs} from '../common/chrome_api.js';
